@@ -2,8 +2,9 @@ const { Router } = require('express');
 const userRouter = Router(); // Instantiate the router
 const { z } = require('zod');
 const bcrypt = require('bcryptjs');
-const { usersModel } = require('../db');
+const { usersModel, purchasesModel } = require('../db');
 const jwt = require('jsonwebtoken');
+const { userMiddleware } = require('../middlewares/user');
 
 
 userRouter.post('/signup', async (req, res) => {
@@ -44,7 +45,7 @@ userRouter.post('/signup', async (req, res) => {
             lastName
         })
 
-        const { password: _, ...sanitizedUser }= newUser._doc;
+        const { password: _, ...sanitizedUser } = newUser._doc;
 
         return res.status(200).json({
             message: 'User created successfully',
@@ -87,7 +88,7 @@ userRouter.post('/signin', async (req, res) => {
         userId: user._id,
     }, process.env.JWT_USER_SECRET);
 
-    const { password: _, ...sanitizedUser }= user._doc;
+    const { password: _, ...sanitizedUser } = user._doc;
 
     res.status(200).json({
         message: 'Logged in successfully',
@@ -96,6 +97,22 @@ userRouter.post('/signin', async (req, res) => {
     });
 
 })
+
+userRouter.get('/purchases', userMiddleware, async (req, res) => {
+    const userId = req.userId;
+
+    try {
+        const purchases = await purchasesModel.find({
+            userId
+        });
+
+        return res.status(200).json({ purchases });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message
+        });
+    }
+});
 
 module.exports = {
     userRouter
