@@ -9,7 +9,7 @@ function userMiddleware(req, res, next) {
         return res.status(401).json({ message: 'Invalid token' });
     }
 
-    req.userId = decoded.id;
+    req.userId = decoded.userId;
     next();
 }
 
