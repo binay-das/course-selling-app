@@ -1,5 +1,6 @@
 const { Router } = require('express');
-const { adminsModel } = require('../db');
+const { adminsModel, coursesModel } = require('../db');
+const { adminMiddleware } = require('../middlewares/admin');
 const adminRouter = Router();
 
 adminRouter.post('/signup', async (req, res) => {
@@ -30,7 +31,7 @@ adminRouter.post('/signup', async (req, res) => {
         if (existingAdmin) {
             return res.status(400).json({ message: 'Email already in use' });
         }
-        
+
         const hashedPassword = await bcrypt.hash(password, 5);
 
         const newUser = await adminsModel.create({
@@ -86,20 +87,91 @@ adminRouter.post('/signin', async (req, res) => {
     });
 })
 
-adminRouter.post('/course', (req, res) => {
+adminRouter.post('/course', adminMiddleware, async (req, res) => {
+    const adminId = req.userId;
 
+    const { title, description, price, imgUrl, creatorId } = req.body;
+
+    try {
+        const newCourse = await adminsModel.create({
+            title,
+            description,
+            price,
+            imgUrl,
+            creatorId: adminId
+        });
+
+        return res.status(200).json({
+            message: 'Course created successfully',
+            newCourse
+        });
+    } catch (error) {
+        return res.status(500).json({ message: error.message });
+    }
 })
 
-adminRouter.put('/course/:id', (req, res) => {
+adminRouter.put('/course/:id', adminMiddleware, async (req, res) => {
+    const adminId = req.userId;
 
+    const { title, description, price, imgUrl, courseId } = req.body;
+
+    const { id } = req.params;
+
+    try {
+        const course = await coursesModel.updateOne(
+            {
+                _id: courseId,
+                creatorId: adminId
+            },
+            {
+                title,
+                description,
+                price,
+                imgUrl
+            }
+        );
+
+        res.status(200).json({
+            message: 'Course updated successfully',
+            courseId
+        });
+    } catch (error) {
+        return res.status(404).json({ error: error.message });
+    }
 })
 
-adminRouter.delete('/course/:id', (req, res) => {
+adminRouter.delete('/course/:id', adminMiddleware, async (req, res) => {
+    const adminId = req.userId;
 
+    const { id } = req.params;
+
+    try {
+        const course = await coursesModel.deleteOne({
+            _id: id,
+            creatorId: adminId
+        });
+    } catch (error) {
+        return res.status(404).json({ error: error.message });
+    }
 })
 
-adminRouter.get('/course/bulk', (req, res) => {
+adminRouter.get('/course/bulk', adminMiddleware, async (req, res) => {
     // retrieve all courses
+
+    const adminId = req.userId;
+
+    try {
+        const courses = await coursesModel.find({
+            creatorId: adminId
+        });
+
+        return res.status(200).json({
+            message: 'Courses retrieved successfully',
+            courses
+        });
+    } catch (error) {
+        return res.status(404).json({ error: error.message });
+    }
 })
 
 module.exports = {

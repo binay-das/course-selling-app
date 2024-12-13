@@ -1,5 +1,3 @@
-require('dotenv').config();
-
 const DB_URL = process.env.DB_URL;
 
 const JWT_USER_SECRET = process.env.JWT_USER_SECRET
