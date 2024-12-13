@@ -10,17 +10,16 @@ userRouter.post('/signup', async (req, res) => {
     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
     const requiredBody = z.object({
-        email: z.string().min(3).max(100).email().required(),
+        email: z.string().min(3).max(100).email(),
         password: z
             .string()
             .min(8, { message: "Password must be at least 8 characters long" })
             .max(100, { message: "Password must be less than 100 characters" })
             .regex(strongPasswordRegex, {
                 message: "Password must include at least one uppercase letter, one lowercase letter, one number, and one special character",
-            })
-            .required(),
-        firstName: z.string().min(3).max(100).required(),
-        lastName: z.string().min(3).max(100)
+            }),
+        firstName: z.string().min(3).max(100),
+        lastName: z.string().min(3).max(100).optional()
     });
 
     const safeParsedData = requiredBody.safeParse(req.body);
