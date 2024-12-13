@@ -42,7 +42,10 @@ const adminSchema = new Schema({
         type: String,
         required: true
     },
-    firstName: String,
+    firstName: {
+        type: String,
+        required: true
+    },
     lastName: String
 });
 
