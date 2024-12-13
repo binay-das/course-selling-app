@@ -12,7 +12,10 @@ const userSchema = new Schema({
         type: String,
         required: true
     },
-    firstName: String,
+    firstName: {
+        type: String,
+        required: true
+    },
     lastName: String
 });
 
@@ -50,15 +53,15 @@ const purchaseSchema = new Schema({
     purchaseDate: Date
 });
 
-const usersSchema = mongoose.model('Users', userSchema);
-const coursesSchema = mongoose.model('Courses', courseSchema);
-const adminsSchema = mongoose.model('Admins', adminSchema);
-const purchasesSchema = mongoose.model('Purchases', purchaseSchema);
+const usersModel = mongoose.model('Users', userSchema);
+const coursesModel = mongoose.model('Courses', courseSchema);
+const adminsModel = mongoose.model('Admins', adminSchema);
+const purchasesModel = mongoose.model('Purchases', purchaseSchema);
 
 
 module.exports = {
-    userSchema,
-    courseSchema,
-    adminSchema,
-    purchaseSchema
+    usersModel,
+    coursesModel,
+    adminsModel,
+    purchasesModel
 }
