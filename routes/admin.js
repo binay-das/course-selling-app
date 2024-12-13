@@ -26,6 +26,11 @@ adminRouter.post('/signup', async (req, res) => {
     const { email, password, firstName, lastName } = req.body;
 
     try {
+        const existingAdmin = await adminsModel.findOne({ email });
+        if (existingAdmin) {
+            return res.status(400).json({ message: 'Email already in use' });
+        }
+        
         const hashedPassword = await bcrypt.hash(password, 5);
 
         const newUser = await adminsModel.create({
@@ -47,8 +52,8 @@ adminRouter.post('/signup', async (req, res) => {
 
 adminRouter.post('/signin', async (req, res) => {
     const requiredBody = z.object({
-        email: z.string().email().required(),
-        password: z.string().required()
+        email: z.string().email(),
+        password: z.string()
     });
 
     const safeParsedData = requiredBody.safeParse(req.body);
