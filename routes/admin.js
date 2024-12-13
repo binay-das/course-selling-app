@@ -1,7 +1,10 @@
 const { Router } = require('express');
+const adminRouter = Router();
+const { z } = require('zod');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const { adminsModel, coursesModel } = require('../db');
 const { adminMiddleware } = require('../middlewares/admin');
-const adminRouter = Router();
 
 adminRouter.post('/signup', async (req, res) => {
     const strongPasswordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -42,7 +45,7 @@ adminRouter.post('/signup', async (req, res) => {
         })
 
         return res.status(200).json({
-            message: 'User created successfully',
+            message: 'Admin created successfully',
             User: newUser
         });
 
@@ -70,7 +73,7 @@ adminRouter.post('/signin', async (req, res) => {
         return res.status(401).json({ message: 'email not registered' });
     }
 
-    const passwordMatch = await bcrypt.compare(password, user.password);
+    const passwordMatch = await bcrypt.compare(password, admin.password);
 
     if (!passwordMatch) {
         return res.status(401).json({ message: 'Invalid credentials' });
