@@ -30,6 +30,11 @@ userRouter.post('/signup', async (req, res) => {
     const { email, password, firstName, lastName } = req.body;
 
     try {
+        const existingUser = await usersModel.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email already registered' });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 5);
 
         const newUser = await usersModel.create({
@@ -39,9 +44,11 @@ userRouter.post('/signup', async (req, res) => {
             lastName
         })
 
+        const { password: _, ...sanitizedUser }= newUser._doc;
+
         return res.status(200).json({
             message: 'User created successfully',
-            User: newUser
+            user: sanitizedUser
         });
 
     } catch (error) {
@@ -80,10 +87,12 @@ userRouter.post('/signin', async (req, res) => {
         userId: user._id,
     }, process.env.JWT_USER_SECRET);
 
+    const { password: _, ...sanitizedUser }= user._doc;
+
     res.status(200).json({
         message: 'Logged in successfully',
         token,
-        user
+        user: sanitizedUser,
     });
 
 })
